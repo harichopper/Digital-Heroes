@@ -1,0 +1,167 @@
+.hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 78vh;
+  display: grid;
+  align-items: center;
+  padding: clamp(2rem, 4vw, 4rem);
+  border-radius: 2rem;
+  background: linear-gradient(135deg, #fff3de 0%, #ffd4b8 40%, #ffbb8a 100%);
+  box-shadow: 0 30px 80px rgba(18, 24, 40, 0.16);
+}
+
+.content {
+  position: relative;
+  z-index: 2;
+  max-width: 42rem;
+  animation: riseIn 0.8s ease-out both;
+}
+
+.eyebrow {
+  display: inline-block;
+  margin-bottom: 1rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.heading {
+  margin: 0;
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(2rem, 4.8vw, 4.2rem);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  color: #121426;
+}
+
+.tagline {
+  margin-top: 1.2rem;
+  max-width: 38rem;
+  color: #2c3148;
+  font-size: clamp(1rem, 1.9vw, 1.2rem);
+  line-height: 1.65;
+}
+
+.ctaGroup {
+  margin-top: 2rem;
+  display: flex;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.primaryButton,
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 10rem;
+  padding: 0.85rem 1.3rem;
+  border-radius: 0.85rem;
+  font-weight: 600;
+  transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+
+.primaryButton {
+  background-color: #111527;
+  color: #fff;
+}
+
+.secondaryButton {
+  border: 1px solid rgba(17, 21, 39, 0.18);
+  background-color: rgba(255, 255, 255, 0.66);
+  color: #111527;
+}
+
+.primaryButton:hover,
+.secondaryButton:hover {
+  transform: translateY(-2px);
+}
+
+.primaryButton:hover {
+  box-shadow: 0 12px 24px rgba(17, 21, 39, 0.22);
+}
+
+.secondaryButton:hover {
+  background-color: rgba(255, 255, 255, 0.84);
+}
+
+.metrics {
+  margin-top: 2.2rem;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.metrics li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.85rem;
+  border-radius: 0.85rem;
+  background-color: rgba(255, 255, 255, 0.58);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.metricNumber {
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #121426;
+}
+
+.metricLabel {
+  font-size: 0.85rem;
+  color: #3f445a;
+}
+
+.glowOne,
+.glowTwo {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(4px);
+  opacity: 0.7;
+}
+
+.glowOne {
+  width: 28rem;
+  height: 28rem;
+  right: -12rem;
+  top: -8rem;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.95) 0%, rgba(255, 236, 206, 0) 68%);
+}
+
+.glowTwo {
+  width: 22rem;
+  height: 22rem;
+  left: -8rem;
+  bottom: -10rem;
+  background: radial-gradient(circle at center, rgba(255, 166, 130, 0.65) 0%, rgba(255, 166, 130, 0) 72%);
+}
+
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 760px) {
+  .hero {
+    min-height: auto;
+    border-radius: 1.4rem;
+  }
+
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+}
