@@ -1,25 +1,33 @@
-# Design Agency Homepage - Next.js Internship Task
+# Northstar Studio
 
-Modern and responsive Design Agency homepage built with Next.js App Router, inspired by Stich AI generated UI direction.
+Modern, conversion-focused design agency website built with Next.js App Router.
 
-## Sections Implemented
+## Live Links
+
+- Live Site: https://northstar-studio-five.vercel.app/
+- GitHub: https://github.com/harichopper/Northstar-Studio
+
+## Project Highlights
+
+- Modern landing experience with strong visual hierarchy
+- Fully responsive sections for mobile, tablet, and desktop
+- Dedicated Start Project flow with its own functional page
+- Backend APIs for form submission
+- MongoDB persistence for both contact and project requests
+- SweetAlert2 popups for success and error feedback
+
+## Sections Included
 
 - Hero Section
-	- Agency name and bold value proposition
-	- Functional CTA buttons: Get Started and View Work
-	- Gradient visual treatment and animated reveal
+  - Agency name, tagline, and CTA buttons
 - Services Section
-	- 4 service cards
-	- Icon, title, and short description for each service
+  - 4 service cards with icon, title, and description
 - Portfolio Section
-	- Responsive grid with 4 projects
-	- Image thumbnails using Next.js Image optimization
-	- Hover interaction and working external case-study links
+  - Responsive project grid with image thumbnails and hover interactions
 - Contact Section
-	- Name, email, and message fields
-	- Client-side + server-side validation
-	- Connected backend API endpoint
-	- Success and error message states
+  - Name, email, and message form with validations
+- Start Project Page
+  - Full intake form (project type, budget, timeline, details)
 
 ## Tech Stack
 
@@ -27,53 +35,55 @@ Modern and responsive Design Agency homepage built with Next.js App Router, insp
 - React 19
 - TypeScript
 - Tailwind CSS
-- MongoDB (official Node.js driver)
+- MongoDB Node.js Driver
 - SweetAlert2
-- next/font (Google fonts)
+- Lucide React Icons
+- next/font
 
-## Setup Instructions
+## API Endpoints
 
-1. Install dependencies:
+- POST /api/contact
+  - Stores contact form submissions in `contact_submissions`
+- POST /api/start-project
+  - Stores project requests in `project_requests`
 
-	 npm install
+## Environment Variables
 
-2. Configure environment variables:
+Create `.env.local` using `.env.example` and configure:
 
-	 Copy .env.example to .env.local and set your MongoDB values.
+- MONGODB_URI=your_mongodb_connection_string
+- MONGODB_DB=northstar_studio
 
-3. Run the development server:
+## Getting Started
 
-	 npm run dev
+1. Install dependencies
 
-4. Open in browser:
+```bash
+npm install
+```
 
-	 http://localhost:3000
+2. Configure environment variables
 
-## Build and Lint
+```bash
+cp .env.example .env.local
+```
 
-- Lint:
+3. Run the development server
 
-	npm run lint
+```bash
+npm run dev
+```
 
-- Production build:
+4. Open http://localhost:3000
 
-	npm run build
+## Scripts
 
-## Submission Links
+- `npm run dev` - Start development server
+- `npm run lint` - Run ESLint
+- `npm run build` - Create production build
+- `npm run start` - Run production server
 
-- GitHub Repository: https://github.com/harichopper/Northstar-Studio.git
-- Live Deployment (Vercel): ADD_YOUR_VERCEL_LINK_HERE
+## Notes
 
-## Assumptions
-
-- Contact form is connected to a backend API route at /api/contact.
-- Start Project form is connected to a backend API route at /api/start-project.
-- Both forms persist submissions in MongoDB collections.
-- Portfolio project thumbnails are representative placeholders for demonstration.
-
-## Additional Features
-
-- SEO metadata configured in app layout metadata
-- Smooth scrolling between sections
-- Responsive layouts for mobile, tablet, and desktop
-- Stich AI visual direction integrated into reusable Next.js component structure
+- This project was built as a Next.js internship evaluation task.
+- Portfolio visuals are placeholder showcase assets.
