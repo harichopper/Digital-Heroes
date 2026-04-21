@@ -43,7 +43,7 @@ function LoginPageContent() {
         return;
       }
 
-      await swal.success('Welcome Back! 👋', 'Redirecting to home…');
+      await swal.success('Welcome Back! 👋', 'Redirecting…');
       let latestSession = await getSession();
       for (let attempt = 0; !latestSession?.user && attempt < 5; attempt += 1) {
         await new Promise((resolve) => setTimeout(resolve, 250));
@@ -51,10 +51,11 @@ function LoginPageContent() {
       }
 
       const userRole = (latestSession?.user as { role?: string } | undefined)?.role;
-      const defaultRedirect = userRole === 'admin' ? '/admin' : '/';
+      const defaultRedirect = userRole === 'admin' ? '/admin' : '/dashboard';
       const callbackUrl = searchParams.get('callbackUrl');
       const isAuthCallback = callbackUrl?.startsWith('/auth/');
       const redirect = callbackUrl && !isAuthCallback ? callbackUrl : defaultRedirect;
+      setLoading(false);
       router.replace(redirect);
       router.refresh();
     } catch {
