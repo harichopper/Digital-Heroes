@@ -9,13 +9,13 @@ monthly prize draws, and charitable giving. Built for the Digital Heroes Selecti
 
 | Layer | Technology |
 |-------|-----------|
-| Framework | Next.js 14 (App Router, TypeScript) |
+| Framework | Next.js 15 (App Router, TypeScript) |
 | Database | MongoDB (Mongoose ODM) |
-| Auth | NextAuth.js (Credentials + OAuth) |
+| Auth | NextAuth.js (Credentials) |
 | Payments | Stripe (Checkout, Subscriptions, Webhooks) |
+| UI/UX | Framer Motion, Lucide React, SweetAlert2 |
 | State | Zustand |
 | Charts | Recharts |
-| Animations | Framer Motion |
 | Deployment | Vercel |
 
 ---
@@ -33,16 +33,15 @@ npm install
 ### 2. Set Up MongoDB
 
 1. Create a MongoDB cluster (MongoDB Atlas recommended)
-2. Create a database named `digital-heroes`
-3. Copy your connection string (include the database name)
-4. The app uses Mongoose models defined in `src/models/`
+2. Copy your connection string
+3. The app uses Mongoose models defined in `src/models/`
 
 ### 3. Set Up Stripe
 
-1. Create a new Stripe account or project
+1. Create a new Stripe account
 2. Create two products/prices:
-   - Monthly: £9.99/month recurring
-   - Yearly: £99.90/year recurring
+   - Monthly recurring
+   - Yearly recurring
 3. Copy the Price IDs
 4. Set up a webhook pointing to `your-domain/api/webhooks/stripe`
    with events: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`
@@ -70,31 +69,18 @@ STRIPE_YEARLY_PRICE_ID=price_...
 
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 
-# Optional: email notifications (Resend)
-EMAIL_PROVIDER=resend
-RESEND_API_KEY=re_...
-EMAIL_FROM=noreply@yourdomain.com
+# Email settings
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASS=your-app-password
 ```
 
-### 5. Create Admin User
+### 5. Seed Database (Optional)
 
-After signing up on the platform, update the user's role in MongoDB:
-
-```javascript
-// In MongoDB shell or Atlas Data Explorer
-db.users.updateOne(
-  { email: 'your-admin@email.com' },
-  { $set: { role: 'admin' } }
-)
-```
-
-### 6. Run Locally
+You can seed the database with initial data:
 
 ```bash
-npm run dev
+npm run seed
 ```
-
-Visit `http://localhost:3000`
 
 ---
 
@@ -102,10 +88,8 @@ Visit `http://localhost:3000`
 
 | Role | Email | Password |
 |------|-------|----------|
-| User | user@test.com | test123456 |
-| Admin | admin@test.com | admin123456 |
-
-> Create these accounts via the signup page, then set the admin role via SQL.
+| User | user@digitalheroes.com | User@123456 |
+| Admin | admin@digitalheroes.com | Admin@123456 |
 
 ---
 
@@ -115,13 +99,11 @@ Visit `http://localhost:3000`
 src/
 ├── app/
 │   ├── page.tsx                    # Homepage
-│   ├── not-found.tsx               # 404 page
 │   ├── auth/
 │   │   ├── login/page.tsx          # Login
 │   │   └── signup/page.tsx         # Signup with plan selection
 │   ├── charities/
-│   │   ├── page.tsx                # Charity directory
-│   │   └── [slug]/page.tsx         # Charity profile
+│   │   └── page.tsx                # Charity directory
 │   ├── dashboard/
 │   │   ├── layout.tsx              # Dashboard shell (sidebar + auth)
 │   │   ├── page.tsx                # Overview
@@ -136,68 +118,52 @@ src/
 │   │   ├── users/page.tsx          # User management
 │   │   ├── draws/page.tsx          # Draw engine + publish
 │   │   ├── charities/page.tsx      # Charity CRUD
-│   │   ├── winners/page.tsx        # Winner verification + payouts
+│   │   ├── winners/page.tsx        # Winner verification
 │   │   └── reports/page.tsx        # Analytics
 │   └── api/
+│       ├── auth/                   # NextAuth API routes
 │       ├── subscribe/route.ts      # Stripe checkout session
-│       ├── scores/route.ts         # Score CRUD with validation
+│       ├── scores/route.ts         # Score CRUD
 │       └── webhooks/stripe/route.ts # Stripe webhook handler
 ├── components/
-│   ├── Navbar.tsx                  # Public nav with mobile menu
-│   └── Footer.tsx                  # Global footer
+│   ├── Navbar.tsx                  # Public nav with session awareness
+│   ├── Footer.tsx                  # Global footer
+│   ├── GlobalLoader.tsx            # Global loading state
+│   └── SessionProvider.tsx         # NextAuth session wrapper
 ├── lib/
-│   ├── types.ts                    # All TypeScript types + constants
-│   ├── utils.ts                    # Shared utility functions
-│   ├── store.ts                    # Zustand global state
-│   ├── draw-engine.ts              # Draw logic (random + algorithmic)
-│   └── supabase/
-│       ├── client.ts               # Browser Supabase client
-│       └── server.ts               # Server Supabase clients (+ admin)
-├── middleware.ts                   # Auth + route protection
-supabase/
-└── schema.sql                      # Full DB schema, RLS, seed data
+│   ├── auth.ts                     # NextAuth configuration
+│   ├── mongodb.ts                  # MongoDB connection
+│   ├── swal.ts                     # SweetAlert2 helpers
+│   ├── draw-engine.ts              # Draw logic
+│   └── store.ts                    # Zustand state management
+└── models/                         # Mongoose schemas (User, Score, Draw, etc.)
 ```
 
 ---
 
 ## Key Features & Implementation
 
-### Score Rolling Logic
-
-The `golf_scores` table has a unique constraint on `(user_id, played_date)`.
-When adding a 6th score, the oldest is automatically deleted first (enforced in both the API route and client-side UI).
-
 ### Draw Engine (`src/lib/draw-engine.ts`)
 
-**Random mode**: 5 unique numbers drawn uniformly from [1, 45].
-
-**Algorithmic mode**: Numbers weighted inversely by frequency across all user scores — less common scores have higher probability of being drawn.
-
-**Prize calculation**: Automatic split by match tier (40/35/25%). Unclaimed jackpots roll forward automatically.
-
-### Row Level Security
-
-All tables enforce RLS. Users can only see/modify their own data.
-Admin role bypasses restrictions using the Service Role key (server-only).
+The draw engine handles generating winning numbers and processing entries. It supports random number generation and algorithmic processing for prize distribution.
 
 ### Stripe Integration
 
-Checkout sessions pass `user_id` as metadata. The webhook picks this up and creates the subscription record in Supabase, linking the Stripe subscription to the user profile.
+Subscription-based access. Webhooks handle subscription lifecycle (creation, updates, cancellations) to keep the local database in sync with Stripe.
+
+### Admin Console
+
+A comprehensive admin interface for managing users, charities, prize draws, and verifying winners. Role-based access control ensures only admins can access these routes.
 
 ---
 
 ## Deployment (Vercel)
 
-```bash
-npm run build   # Verify build passes locally first
-```
-
 1. Push to GitHub
-2. Import repo into a **new** Vercel account
-3. Add all environment variables in Vercel project settings
-4. Set `NEXT_PUBLIC_APP_URL` to your Vercel deployment URL
-5. Update Stripe webhook to point to `https://your-app.vercel.app/api/webhooks/stripe`
-6. Deploy!
+2. Import repo into Vercel
+3. Add all environment variables
+4. Deploy!
+
 
 ### Push to GitHub
 
