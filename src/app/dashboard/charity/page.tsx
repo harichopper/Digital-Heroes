@@ -84,8 +84,8 @@ export default function CharityPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)', flexWrap: 'wrap' }}>
           <input
             type="range"
-            min={5}
-            max={50}
+            min={10}
+            max={100}
             step={5}
             value={percentage}
             onChange={e => setPercentage(Number(e.target.value))}

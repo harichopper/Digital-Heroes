@@ -103,7 +103,7 @@ export async function GET() {
   return NextResponse.json({ draws });
 }
 
-export async function POST() {
+export async function POST(req: NextRequest) {
   const session = await adminGuard();
   if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   await connectDB();
@@ -119,11 +119,14 @@ export async function POST() {
   const carryRollover = previousPublished?.jackpotRollover || 0;
   const sessionUser = getSessionUser(session);
 
+  const body = await req.json().catch(() => ({})) as { drawType?: 'random' | 'algorithmic' };
+  const drawType = body.drawType === 'algorithmic' ? 'algorithmic' : 'random';
+
   const draw = await Draw.create({
     drawDate: now.toISOString().split('T')[0],
     month,
     year,
-    drawType: 'random',
+    drawType,
     status: 'pending',
     jackpotRollover: carryRollover,
     createdBy: sessionUser.id,

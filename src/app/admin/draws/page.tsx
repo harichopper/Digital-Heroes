@@ -21,6 +21,7 @@ export default function AdminDrawsPage() {
   const [draws, setDraws] = useState<Draw[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState<string | null>(null);
+  const [newDrawType, setNewDrawType] = useState<'random' | 'algorithmic'>('random');
 
   const loadDraws = async () => {
     const d = await fetch('/api/admin/draws').then(r => r.json());
@@ -34,7 +35,11 @@ export default function AdminDrawsPage() {
     const ok = await swal.confirm('Create Draw', 'Create a new monthly draw for the current period?', 'Yes, create');
     if (!ok) return;
     const d = await withLoading(
-      () => fetch('/api/admin/draws', { method: 'POST' }).then(r => r.json().then(j => ({ ...j, ok: r.ok }))),
+      () => fetch('/api/admin/draws', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ drawType: newDrawType }),
+      }).then(r => r.json().then(j => ({ ...j, ok: r.ok }))),
       'Creating draw…', 'Setting up prize pools'
     );
     if (d.ok) { await swal.success('Draw Created!', 'Prize pools are now configured.'); loadDraws(); }
@@ -81,10 +86,21 @@ export default function AdminDrawsPage() {
           <h1 style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Trophy size={24} /> Draw Management</h1>
           <p>Create, simulate, and publish monthly draws.</p>
         </div>
-        <motion.button className="btn btn-primary" onClick={createDraw} id="create-draw-btn"
-          whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-          <Plus size={16} /> New Draw
-        </motion.button>
+        <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center' }}>
+          <select
+            className="form-input"
+            value={newDrawType}
+            onChange={(e) => setNewDrawType(e.target.value as 'random' | 'algorithmic')}
+            style={{ minWidth: 150, height: 40 }}
+          >
+            <option value="random">Random</option>
+            <option value="algorithmic">Algorithmic</option>
+          </select>
+          <motion.button className="btn btn-primary" onClick={createDraw} id="create-draw-btn"
+            whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Plus size={16} /> New Draw
+          </motion.button>
+        </div>
       </div>
 
       {loading ? <ContentLoader rows={4} /> : draws.length === 0 ? (

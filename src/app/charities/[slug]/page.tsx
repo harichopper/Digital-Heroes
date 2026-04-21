@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ExternalLink, ArrowLeft, Heart } from 'lucide-react';
+import { ExternalLink, ArrowLeft, Heart, Calendar } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { connectDB } from '@/lib/mongodb';
@@ -13,7 +13,10 @@ type CharityPageData = {
   category?: string;
   isFeatured: boolean;
   websiteUrl?: string;
+  logoUrl?: string;
+  coverImageUrl?: string;
   totalReceived: number;
+  upcomingEvents?: Array<{ title: string; date: string; description: string; location?: string }>;
 };
 
 function formatCurrency(pence: number) {
@@ -36,11 +39,21 @@ export default async function CharityDetailPage({ params }: { params: Promise<{ 
               <ArrowLeft size={16} /> All Charities
             </Link>
 
+            {charity.coverImageUrl && (
+              <div className="card" style={{ marginBottom: 'var(--space-5)', padding: 0, overflow: 'hidden' }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={charity.coverImageUrl} alt={`${charity.name} cover`} style={{ width: '100%', maxHeight: 320, objectFit: 'cover', display: 'block' }} />
+              </div>
+            )}
+
             <div className="card" style={{ marginBottom: 'var(--space-8)', position: 'relative', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg,#10b981,#a855f7)' }} />
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-6)', flexWrap: 'wrap' }}>
                 <div style={{ width: 80, height: 80, borderRadius: 'var(--radius-xl)', background: 'linear-gradient(135deg,#10b981,#a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', flexShrink: 0 }}>
-                  💚
+                  {charity.logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={charity.logoUrl} alt={`${charity.name} logo`} style={{ width: 70, height: 70, borderRadius: 12, objectFit: 'cover' }} />
+                  ) : '💚'}
                 </div>
                 <div style={{ flex: 1 }}>
                   {charity.isFeatured && <span className="badge badge-warm" style={{ marginBottom: 'var(--space-3)' }}>✨ Featured</span>}
@@ -70,6 +83,24 @@ export default async function CharityDetailPage({ params }: { params: Promise<{ 
                 {charity.description || charity.shortDescription}
               </p>
             </div>
+
+            {!!charity.upcomingEvents?.length && (
+              <div className="card" style={{ marginTop: 'var(--space-6)' }}>
+                <h2 className="text-h3" style={{ marginBottom: 'var(--space-4)' }}>Upcoming Events</h2>
+                <div style={{ display: 'grid', gap: 'var(--space-3)' }}>
+                  {charity.upcomingEvents.map((event, idx) => (
+                    <div key={`${event.title}-${idx}`} style={{ border: '1px solid var(--border-subtle)', borderRadius: 12, padding: 'var(--space-4)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                        <Calendar size={14} />
+                        <strong>{event.title}</strong>
+                      </div>
+                      <div className="text-sm" style={{ color: 'var(--text-muted)' }}>{event.date}{event.location ? ` · ${event.location}` : ''}</div>
+                      <p className="text-sm" style={{ marginTop: 8, color: 'var(--text-secondary)' }}>{event.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </section>
       </main>

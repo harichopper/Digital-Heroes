@@ -32,10 +32,29 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [greeting, setGreeting] = useState('');
+  const [subscriptionChecked, setSubscriptionChecked] = useState(false);
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/auth/login');
   }, [status, router]);
+
+  useEffect(() => {
+    if (status !== 'authenticated') return;
+    const checkSubscription = async () => {
+      try {
+        const res = await fetch('/api/user/subscription');
+        const data = await res.json();
+        const subStatus = data?.subscription?.status;
+        const isSettingsPage = pathname?.startsWith('/dashboard/settings');
+        if (subStatus !== 'active' && !isSettingsPage) {
+          router.replace('/dashboard/settings?subscription=required');
+        }
+      } finally {
+        setSubscriptionChecked(true);
+      }
+    };
+    checkSubscription();
+  }, [status, router, pathname]);
 
   // Time-based greeting
   useEffect(() => {
@@ -45,7 +64,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     else setGreeting('Good Evening');
   }, []);
 
-  if (status === 'loading') return <PageLoader text="Loading Your Dashboard..." />;
+  if (status === 'loading' || (status === 'authenticated' && !subscriptionChecked)) return <PageLoader text="Loading Your Dashboard..." />;
   if (!session) return null;
 
   const handleLogout = async () => {
