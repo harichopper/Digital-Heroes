@@ -1,77 +1,69 @@
-import { NextResponse } from "next/server";
-import { getDatabase } from "@/lib/mongodb";
+import { NextRequest, NextResponse } from 'next/server';
+import { connectDB } from '@/lib/mongodb';
+import { ContactMessage } from '@/models/ContactMessage';
+import { sendEmail } from '@/lib/email';
 
-type ContactBody = {
-  name?: string;
-  email?: string;
-  message?: string;
-};
-
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function validateContact(body: ContactBody) {
-  const name = body.name?.trim() ?? "";
-  const email = body.email?.trim() ?? "";
-  const message = body.message?.trim() ?? "";
-
-  if (!name || !email || !message) {
-    return "Please fill in all fields before submitting.";
-  }
-
-  if (!EMAIL_PATTERN.test(email)) {
-    return "Please provide a valid email address.";
-  }
-
-  if (name.length > 80 || email.length > 120 || message.length > 2000) {
-    return "Input is too long. Please shorten your message and try again.";
-  }
-
-  return null;
-}
-
-export async function POST(request: Request) {
-  let body: ContactBody;
-
+/**
+ * POST /api/contact
+ * Accepts a contact form submission and persists it to MongoDB.
+ */
+export async function POST(req: NextRequest) {
   try {
-    body = (await request.json()) as ContactBody;
-  } catch {
-    return NextResponse.json(
-      { message: "Invalid request payload. Please try again." },
-      { status: 400 },
-    );
-  }
+    await connectDB();
+    const { name, email, topic, message } = await req.json();
 
-  const validationError = validateContact(body);
+    if (!name?.trim() || !email?.trim() || !message?.trim()) {
+      return NextResponse.json(
+        { error: 'Name, email, and message are required.' },
+        { status: 400 }
+      );
+    }
 
-  if (validationError) {
-    return NextResponse.json({ message: validationError }, { status: 400 });
-  }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json({ error: 'Invalid email address.' }, { status: 400 });
+    }
 
-  try {
-    const submissionId = crypto.randomUUID();
-    const now = new Date();
-    const db = await getDatabase();
-
-    await db.collection("contact_submissions").insertOne({
-      submissionId,
-      name: body.name?.trim(),
-      email: body.email?.trim(),
-      message: body.message?.trim(),
-      source: "contact_form",
-      createdAt: now,
+    const doc = await ContactMessage.create({
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      topic: topic?.trim() || 'General Enquiry',
+      message: message.trim(),
     });
 
-    return NextResponse.json(
-      {
-        message: "Thanks! Your message has been received. We will reply within 24 hours.",
-        submissionId,
-      },
-      { status: 200 },
-    );
-  } catch {
-    return NextResponse.json(
-      { message: "Unable to save your message right now. Please try again." },
-      { status: 500 },
-    );
+    const supportInbox = process.env.SUPPORT_EMAIL || 'support@digitalheroes.co.in';
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedName = name.trim();
+    const normalizedTopic = topic?.trim() || 'General Enquiry';
+
+    // Send notifications best-effort; form submission should not fail if email provider is unavailable.
+    await Promise.allSettled([
+      sendEmail({
+        to: normalizedEmail,
+        subject: 'We received your message - Digital Heroes',
+        html: `
+          <p>Hi ${normalizedName},</p>
+          <p>Thanks for contacting Digital Heroes. We received your message and will reply within 24 hours on business days.</p>
+          <p><strong>Topic:</strong> ${normalizedTopic}</p>
+          <p><strong>Your message:</strong><br/>${message.trim()}</p>
+          <p>Regards,<br/>Digital Heroes Support</p>
+        `,
+      }),
+      sendEmail({
+        to: supportInbox,
+        subject: `New contact message: ${normalizedTopic}`,
+        html: `
+          <p><strong>From:</strong> ${normalizedName} (${normalizedEmail})</p>
+          <p><strong>Topic:</strong> ${normalizedTopic}</p>
+          <p><strong>Message:</strong><br/>${message.trim()}</p>
+          <p><strong>Message ID:</strong> ${String(doc._id)}</p>
+        `,
+      }),
+    ]);
+
+    return NextResponse.json({ success: true, id: doc._id }, { status: 201 });
+  } catch (err) {
+    console.error('Contact form error:', err);
+    return NextResponse.json({ error: 'Failed to send message.' }, { status: 500 });
   }
 }

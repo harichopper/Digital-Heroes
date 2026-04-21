@@ -1,0 +1,398 @@
+/* ============================================
+ * Admin Panel Theme — "Command Center" / HUD
+ * 
+ * DRAMATICALLY different from user dashboard:
+ *   User = Warm emerald, organic rounded corners, friendly
+ *   Admin = Cold cyberpunk HUD, angular cuts, monospace, purple, data-heavy
+ * ============================================ */
+
+/* ── Override CSS tokens ── */
+.admin-theme {
+  --primary-400: #c084fc;
+  --primary-500: #a855f7;
+  --primary-600: #9333ea;
+  --primary-glow: rgba(168, 85, 247, 0.25);
+  --accent-400: #f87171;
+  --accent-500: #ef4444;
+  --gradient-primary: linear-gradient(135deg, #a855f7, #6366f1);
+  --gradient-accent: linear-gradient(135deg, #ef4444, #f97316);
+  --bg-primary: #08060f;
+  --bg-secondary: #0f0a1e;
+  --bg-card: rgba(88, 28, 135, 0.08);
+  --border-subtle: rgba(168, 85, 247, 0.12);
+  --border-default: rgba(168, 85, 247, 0.2);
+  --radius-lg: 4px !important;   /* Angular look */
+  --radius-xl: 6px !important;
+  --radius-2xl: 8px !important;
+}
+
+/* ── Grid background — cyberpunk data grid ── */
+.admin-theme {
+  background-image:
+    linear-gradient(rgba(168,85,247,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(168,85,247,0.03) 1px, transparent 1px) !important;
+  background-size: 40px 40px !important;
+}
+
+/* ── Scanline overlay — CRT monitor effect ── */
+.admin-theme::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 20%, rgba(168,85,247,0.7) 50%, transparent 80%);
+  animation: admin-scan 4s linear infinite;
+  z-index: 1000;
+  pointer-events: none;
+  filter: blur(0.3px);
+}
+
+.admin-theme::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.02) 2px,
+    rgba(0,0,0,0.02) 4px
+  );
+}
+
+@keyframes admin-scan {
+  0% { transform: translateY(0); opacity: 0; }
+  5% { opacity: 1; }
+  95% { opacity: 1; }
+  100% { transform: translateY(100vh); opacity: 0; }
+}
+
+/* ── Admin nav = HUD top bar ── */
+.admin-theme nav.nav {
+  background: rgba(8, 6, 15, 0.98) !important;
+  border-bottom: 1px solid rgba(168, 85, 247, 0.3) !important;
+  box-shadow:
+    0 0 40px rgba(168, 85, 247, 0.08),
+    inset 0 -1px 0 rgba(168, 85, 247, 0.15) !important;
+}
+
+/* ── Admin sidebar — dark HUD panel ── */
+.admin-theme .dashboard-sidebar {
+  background: rgba(8, 6, 15, 0.97) !important;
+  border-right: 1px solid rgba(168, 85, 247, 0.2) !important;
+  font-family: 'Courier New', 'Fira Code', monospace !important;
+}
+
+.admin-theme .sidebar-section-title {
+  font-family: 'Courier New', monospace !important;
+  letter-spacing: 0.15em !important;
+  font-size: 0.65rem !important;
+  text-transform: uppercase !important;
+}
+
+.admin-theme .sidebar-link {
+  border-radius: 3px !important;
+  font-size: 0.8125rem !important;
+  letter-spacing: 0.03em !important;
+  border-left: 2px solid transparent;
+  transition: all 0.15s ease !important;
+}
+
+.admin-theme .sidebar-link.active {
+  background: rgba(168, 85, 247, 0.15) !important;
+  color: #c084fc !important;
+  border-left-color: #a855f7 !important;
+  box-shadow: inset 3px 0 12px rgba(168,85,247,0.1) !important;
+}
+
+.admin-theme .sidebar-link:hover {
+  background: rgba(168, 85, 247, 0.08) !important;
+  color: #c084fc !important;
+  border-left-color: rgba(168,85,247,0.4) !important;
+}
+
+/* ── Admin main area ── */
+.admin-theme .dashboard-main {
+  background: transparent !important;
+}
+
+/* ── Angular cards with cut corners ── */
+.admin-theme .card {
+  border-radius: 4px !important;
+  border: 1px solid rgba(168, 85, 247, 0.15) !important;
+  background: rgba(12, 8, 24, 0.85) !important;
+  backdrop-filter: blur(10px) !important;
+  position: relative;
+}
+
+.admin-theme .card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 20px; height: 20px;
+  border-top: 1px solid rgba(168,85,247,0.4);
+  border-left: 1px solid rgba(168,85,247,0.4);
+  border-radius: 0;
+  pointer-events: none;
+}
+
+.admin-theme .card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; right: 0;
+  width: 20px; height: 20px;
+  border-bottom: 1px solid rgba(168,85,247,0.4);
+  border-right: 1px solid rgba(168,85,247,0.4);
+  border-radius: 0;
+  pointer-events: none;
+}
+
+.admin-theme .card:hover {
+  border-color: rgba(168, 85, 247, 0.4) !important;
+  box-shadow:
+    0 0 0 1px rgba(168, 85, 247, 0.15),
+    0 0 30px rgba(168, 85, 247, 0.06),
+    0 20px 40px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* ── Header text — monospace + purple gradient ── */
+.admin-theme .dashboard-header h1 {
+  font-family: 'Courier New', monospace !important;
+  letter-spacing: 0.03em !important;
+}
+
+.admin-theme .dashboard-header p {
+  font-family: 'Courier New', monospace !important;
+  opacity: 0.6 !important;
+  letter-spacing: 0.04em !important;
+  font-size: 0.8rem !important;
+}
+
+/* ── Admin table — HUD data table ── */
+.admin-theme .table {
+  font-family: 'Courier New', monospace !important;
+  font-size: 0.8125rem !important;
+}
+
+.admin-theme .table thead th {
+  background: rgba(88, 28, 135, 0.25) !important;
+  color: #c084fc !important;
+  border-bottom: 2px solid rgba(168, 85, 247, 0.3) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  font-size: 0.7rem !important;
+  font-weight: 700 !important;
+}
+
+.admin-theme .table tbody tr {
+  border-bottom: 1px solid rgba(168, 85, 247, 0.08) !important;
+}
+
+.admin-theme .table tbody tr:hover td {
+  background: rgba(168, 85, 247, 0.06) !important;
+}
+
+/* ── Buttons — angular, glowing ── */
+.admin-theme .btn-primary {
+  background: linear-gradient(135deg, #a855f7, #7c3aed) !important;
+  box-shadow: 0 4px 20px rgba(168, 85, 247, 0.35) !important;
+  border-radius: 4px !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+}
+
+.admin-theme .btn-primary:hover {
+  box-shadow:
+    0 8px 30px rgba(168, 85, 247, 0.5),
+    0 0 0 1px rgba(168, 85, 247, 0.6) !important;
+}
+
+.admin-theme .btn-outline {
+  border-radius: 4px !important;
+  border: 1px solid rgba(168,85,247,0.3) !important;
+  color: #c084fc !important;
+}
+
+.admin-theme .btn-ghost {
+  border-radius: 3px !important;
+}
+
+/* ── Admin badge — terminal ── */
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  color: #c084fc;
+  padding: 4px 14px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  animation: admin-pulse 3s ease-in-out infinite;
+}
+
+@keyframes admin-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(168,85,247,0); }
+  50% { box-shadow: 0 0 0 4px rgba(168,85,247,0.15); }
+}
+
+/* ── Status badges — mono ── */
+.admin-theme .badge {
+  border-radius: 3px !important;
+  font-family: 'Courier New', monospace !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  font-size: 0.65rem !important;
+}
+
+/* ── Live clock dot ── */
+.live-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  color: #4ade80;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.1em;
+}
+
+.live-dot::before {
+  content: '';
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 10px #4ade80;
+  animation: live-blink 1.2s ease-in-out infinite;
+}
+
+@keyframes live-blink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(0.7); }
+}
+
+/* ── Terminal text ── */
+.admin-terminal-text {
+  font-family: 'Courier New', monospace !important;
+  color: #c084fc;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+/* ── Stat cards — angular neon ── */
+.admin-theme .card-stat {
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+}
+
+.admin-theme .card-stat .stat-label {
+  font-family: 'Courier New', monospace !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+  font-size: 0.6rem !important;
+  font-weight: 700 !important;
+  color: #94a3b8 !important;
+}
+
+.admin-theme .card-stat .stat-value {
+  font-family: 'Courier New', monospace !important;
+}
+
+/* ── Form inputs — angular ── */
+.admin-theme .form-input {
+  border-radius: 3px !important;
+  border: 1px solid rgba(168,85,247,0.25) !important;
+  background: rgba(12,8,24,0.9) !important;
+  font-family: 'Courier New', monospace !important;
+}
+
+.admin-theme .form-input:focus {
+  border-color: #a855f7 !important;
+  box-shadow: 0 0 0 3px rgba(168,85,247,0.15) !important;
+}
+
+/* ── Empty states ── */
+.admin-theme .empty-state {
+  border: 1px dashed rgba(168,85,247,0.25) !important;
+  background: rgba(12,8,24,0.5) !important;
+}
+
+/* ── Skeleton shimmer — enhanced for admin ── */
+.admin-theme .skeleton,
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(168,85,247,0.04) 0%,
+    rgba(168,85,247,0.1) 40%,
+    rgba(168,85,247,0.04) 80%
+  ) !important;
+  background-size: 400% 100% !important;
+  animation: skeleton-sweep 1.8s ease-in-out infinite !important;
+  border-radius: 3px !important;
+  border: none !important;
+}
+
+@keyframes skeleton-sweep {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+/* ── Action button states ── */
+.btn-loading {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.btn-loading::after {
+  content: '';
+  position: absolute;
+  width: 14px; height: 14px;
+  top: 50%; left: 50%;
+  margin: -7px 0 0 -7px;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: btn-spin 0.6s linear infinite;
+}
+
+@keyframes btn-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Score balls in admin — square style ── */
+.admin-theme .score-ball,
+.admin-theme .number-reveal {
+  border-radius: 6px !important;
+  font-family: 'Courier New', monospace !important;
+}
+
+/* ── Danger zone card ── */
+.danger-zone {
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+  background: rgba(239, 68, 68, 0.04) !important;
+}
+
+/* ── Admin scrollbar ── */
+.admin-theme ::-webkit-scrollbar {
+  width: 4px;
+}
+.admin-theme ::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.2);
+}
+.admin-theme ::-webkit-scrollbar-thumb {
+  background: rgba(168,85,247,0.3);
+  border-radius: 2px;
+}
+.admin-theme ::-webkit-scrollbar-thumb:hover {
+  background: rgba(168,85,247,0.5);
+}
