@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { signIn, useSession } from 'next-auth/react';
+import { getSession, signIn, useSession } from 'next-auth/react';
 import { motion } from 'framer-motion';
 import { Mail, Lock, ArrowRight, Eye, EyeOff, Zap } from 'lucide-react';
 import { swal } from '@/lib/swal';
@@ -44,8 +44,17 @@ function LoginPageContent() {
       }
 
       await swal.success('Welcome Back! 👋', 'Redirecting to home…');
+      let latestSession = await getSession();
+      for (let attempt = 0; !latestSession?.user && attempt < 5; attempt += 1) {
+        await new Promise((resolve) => setTimeout(resolve, 250));
+        latestSession = await getSession();
+      }
+
+      const userRole = (latestSession?.user as { role?: string } | undefined)?.role;
+      const defaultRedirect = userRole === 'admin' ? '/admin' : '/';
       const callbackUrl = searchParams.get('callbackUrl');
-      const redirect = callbackUrl && callbackUrl !== '/auth/login' ? callbackUrl : '/';
+      const isAuthCallback = callbackUrl?.startsWith('/auth/');
+      const redirect = callbackUrl && !isAuthCallback ? callbackUrl : defaultRedirect;
       router.replace(redirect);
       router.refresh();
     } catch {
